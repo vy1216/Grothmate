@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
+import 'dart:convert';
 import '../models/models.dart';
 import '../constants/food_database.dart';
 import 'web_storage.dart';
@@ -13,7 +13,10 @@ class AppDatabase {
   AppDatabase._();
   static AppDatabase get instance => _instance ??= AppDatabase._();
 
-  Future<Database?> get database async => kIsWeb ? null : (_db ??= await _init());
+  Future<Database?> get database async {
+    if (kIsWeb) return null;
+    return _db ??= await _init();
+  }
 
   Future<Database> _init() async {
     final path = join(await getDatabasesPath(), 'growthmate.db');
@@ -105,7 +108,8 @@ class AppDatabase {
       return rows.isEmpty ? null : UserModel.fromMap(rows.first);
     }
     final db = await database;
-    final rows = await db!.query('users', limit: 1);
+    if (db == null) return null;
+    final rows = await db.query('users', limit: 1);
     return rows.isEmpty ? null : UserModel.fromMap(rows.first);
   }
 
@@ -120,7 +124,8 @@ class AppDatabase {
       return id;
     }
     final db = await database;
-    final id = await db!.insert('users', user.toMap());
+    if (db == null) return 0;
+    final id = await db.insert('users', user.toMap());
     await db.insert('weight_entries', {
       'user_id': id,
       'weight_kg': user.weightKg,
@@ -135,7 +140,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.update('users', data, where: 'id = ?', whereArgs: [id]);
+    if (db == null) return;
+    await db.update('users', data, where: 'id = ?', whereArgs: [id]);
   }
 
   // ── MEALS ─────────────────────────────────────────────
@@ -145,7 +151,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.insert('meal_logs', meal.toMap());
+    if (db == null) return;
+    await db.insert('meal_logs', meal.toMap());
   }
 
   Future<List<MealLog>> getTodayMeals(int userId) async {
@@ -159,7 +166,8 @@ class AppDatabase {
       return filtered.map(MealLog.fromMap).toList();
     }
     final db = await database;
-    final rows = await db!.query(
+    if (db == null) return [];
+    final rows = await db.query(
       'meal_logs',
       where: "user_id = ? AND date(logged_at) = ?",
       whereArgs: [userId, today],
@@ -174,20 +182,21 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.delete('meal_logs', where: 'id = ?', whereArgs: [id]);
+    if (db == null) return;
+    await db.delete('meal_logs', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<List<MealLog>> getRecentMeals(int userId) async {
     if (kIsWeb) {
       final rows = await WebStorage.load('meal_logs');
       final filtered = rows.where((r) => r['user_id'] == userId).toList();
-      // Reverse and limit to 20
       final sorted = filtered.reversed.take(20).toList();
       return sorted.map(MealLog.fromMap).toList();
     }
     final db = await database;
-    final rows = await db!.rawQuery(
-      'SELECT DISTINCT food_name, food_id, calories, protein_g, carbs_g, fat_g, sugar_g, portion_g, meal_slot FROM meal_logs WHERE user_id = ? ORDER BY logged_at DESC LIMIT 20',
+    if (db == null) return [];
+    final rows = await db.rawQuery(
+      'SELECT DISTINCT user_id, food_name, food_id, calories, protein_g, carbs_g, fat_g, sugar_g, portion_g, meal_slot, logged_at FROM meal_logs WHERE user_id = ? ORDER BY logged_at DESC LIMIT 20',
       [userId],
     );
     return rows.map(MealLog.fromMap).toList();
@@ -208,7 +217,8 @@ class AppDatabase {
     }
     final q = '%$query%';
     final db = await database;
-    final rows = await db!.query(
+    if (db == null) return [];
+    final rows = await db.query(
       'food_database',
       where: 'name LIKE ? OR aliases LIKE ?',
       whereArgs: [q, q],
@@ -224,7 +234,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.insert('workout_logs', workout.toMap());
+    if (db == null) return;
+    await db.insert('workout_logs', workout.toMap());
   }
 
   Future<List<WorkoutLog>> getTodayWorkouts(int userId) async {
@@ -238,7 +249,8 @@ class AppDatabase {
       return filtered.map(WorkoutLog.fromMap).toList();
     }
     final db = await database;
-    final rows = await db!.query(
+    if (db == null) return [];
+    final rows = await db.query(
       'workout_logs',
       where: "user_id = ? AND date(logged_at) = ?",
       whereArgs: [userId, today],
@@ -257,7 +269,8 @@ class AppDatabase {
       return filtered.map(WorkoutLog.fromMap).toList();
     }
     final db = await database;
-    final rows = await db!.rawQuery(
+    if (db == null) return [];
+    final rows = await db.rawQuery(
       "SELECT * FROM workout_logs WHERE user_id = ? AND date(logged_at) >= date('now','-7 days') ORDER BY logged_at DESC",
       [userId],
     );
@@ -271,7 +284,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.insert('mood_logs', mood.toMap());
+    if (db == null) return;
+    await db.insert('mood_logs', mood.toMap());
   }
 
   Future<MoodLog?> getTodayMood(int userId) async {
@@ -285,7 +299,8 @@ class AppDatabase {
       return filtered.isEmpty ? null : MoodLog.fromMap(filtered.last);
     }
     final db = await database;
-    final rows = await db!.query(
+    if (db == null) return null;
+    final rows = await db.query(
       'mood_logs',
       where: "user_id = ? AND date(logged_at) = ?",
       whereArgs: [userId, today],
@@ -306,7 +321,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.insert('water_logs', {
+    if (db == null) return;
+    await db.insert('water_logs', {
       'user_id': userId,
       'glasses': 1,
       'logged_at': DateTime.now().toIso8601String(),
@@ -324,7 +340,8 @@ class AppDatabase {
       return filtered.fold(0, (sum, r) => sum + (r['glasses'] as int));
     }
     final db = await database;
-    final result = await db!.rawQuery(
+    if (db == null) return 0;
+    final result = await db.rawQuery(
       "SELECT COALESCE(SUM(glasses),0) as total FROM water_logs WHERE user_id = ? AND date(logged_at) = ?",
       [userId, today],
     );
@@ -339,7 +356,6 @@ class AppDatabase {
         'weight_kg': kg,
         'logged_at': DateTime.now().toIso8601String(),
       });
-      // Also update user's current weight and BMI
       final user = await getUser();
       if (user != null) {
         final double bmi = kg / ((user.heightCm / 100) * (user.heightCm / 100));
@@ -348,7 +364,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    await db!.insert('weight_entries', {
+    if (db == null) return;
+    await db.insert('weight_entries', {
       'user_id': userId,
       'weight_kg': kg,
       'logged_at': DateTime.now().toIso8601String(),
@@ -367,7 +384,8 @@ class AppDatabase {
       return filtered.map(WeightEntry.fromMap).toList();
     }
     final db = await database;
-    final rows = await db!.query(
+    if (db == null) return [];
+    final rows = await db.query(
       'weight_entries',
       where: 'user_id = ?',
       whereArgs: [userId],
@@ -378,60 +396,42 @@ class AppDatabase {
 
   // ── CHAT ──────────────────────────────────────────────
   Future<void> logChat(int userId, String role, String content, [String mode = 'health']) async {
-    if (kIsWeb) {
-      await WebStorage.insert('ai_conversations', {
-        'user_id': userId,
-        'role': role,
-        'content': content,
-        'mode': mode,
-        'logged_at': DateTime.now().toIso8601String(),
-      });
-      return;
-    }
-    final db = await database;
-    await db!.insert('ai_conversations', {
+    final data = {
       'user_id': userId,
       'role': role,
       'content': content,
       'mode': mode,
       'logged_at': DateTime.now().toIso8601String(),
-    });
+    };
+    if (kIsWeb) {
+      await WebStorage.insert('ai_conversations', data);
+      return;
+    }
+    final db = await database;
+    if (db == null) return;
+    await db.insert('ai_conversations', data);
   }
 
-  Future<List<ChatMessage>> getChatHistory(int userId, [String mode = 'health']) async {
+  Future<List<Map<String, dynamic>>> getConversationHistory(int userId, {int limit = 50, String mode = 'health'}) async {
     if (kIsWeb) {
       final rows = await WebStorage.load('ai_conversations');
       final filtered = rows.where((r) => r['user_id'] == userId && r['mode'] == mode).toList();
-      return filtered.map((r) => ChatMessage(
-        role: r['role'] as String,
-        content: r['content'] as String,
-        mode: r['mode'] as String,
-        loggedAt: DateTime.parse(r['logged_at'] as String),
-      )).toList();
+      return filtered.reversed.take(limit).toList().reversed.toList();
     }
     final db = await database;
-    final rows = await db!.query(
+    if (db == null) return [];
+    final rows = await db.query(
       'ai_conversations',
       where: 'user_id = ? AND mode = ?',
       whereArgs: [userId, mode],
-      orderBy: 'logged_at ASC',
-      limit: 50,
+      orderBy: 'logged_at DESC',
+      limit: limit,
     );
-    return rows.map((r) => ChatMessage(
-      role: r['role'] as String,
-      content: r['content'] as String,
-      mode: r['mode'] as String,
-      loggedAt: DateTime.parse(r['logged_at'] as String),
-    )).toList();
+    return rows.reversed.toList();
   }
 
   // ── STREAK ────────────────────────────────────────────
   Future<int> getCurrentStreak(int userId) async {
-    if (kIsWeb) {
-      final user = await getUser();
-      return user?.bestStreak ?? 0;
-    }
-    final db = await database;
     final user = await getUser();
     return user?.bestStreak ?? 0;
   }
@@ -462,7 +462,8 @@ class AppDatabase {
       return;
     }
     final db = await database;
-    final rows = await db!.query('daily_completions', where: 'user_id = ? AND date = ?', whereArgs: [userId, date]);
+    if (db == null) return;
+    final rows = await db.query('daily_completions', where: 'user_id = ? AND date = ?', whereArgs: [userId, date]);
     if (rows.isNotEmpty) {
       final List<String> actions = List<String>.from(jsonDecode(rows.first['actions_completed_json'] as String));
       if (!actions.contains(action)) {
@@ -481,34 +482,41 @@ class AppDatabase {
 
   // ── STATS ─────────────────────────────────────────────
   Future<Map<String, dynamic>> getWeekStats(int userId) async {
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+    final sevenDaysAgoStr = sevenDaysAgo.toIso8601String().split('T')[0];
+
     if (kIsWeb) {
       final meals = await WebStorage.load('meal_logs');
-      final water = await WebStorage.load('water_logs');
       final mood = await WebStorage.load('mood_logs');
-      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+      final workouts = await WebStorage.load('workout_logs');
       
-      final filteredMeals = meals.where((r) => r['user_id'] == userId && DateTime.parse(r['logged_at'] as String).isAfter(sevenDaysAgo)).toList();
-      final filteredWater = water.where((r) => r['user_id'] == userId && DateTime.parse(r['logged_at'] as String).isAfter(sevenDaysAgo)).toList();
-      final filteredMood = mood.where((r) => r['user_id'] == userId && DateTime.parse(r['logged_at'] as String).isAfter(sevenDaysAgo)).toList();
+      final filteredMeals = meals.where((r) => r['user_id'] == userId && (r['logged_at'] as String).compareTo(sevenDaysAgoStr) >= 0).toList();
+      final filteredMood = mood.where((r) => r['user_id'] == userId && (r['logged_at'] as String).compareTo(sevenDaysAgoStr) >= 0).toList();
+      final filteredWorkouts = workouts.where((r) => r['user_id'] == userId && (r['logged_at'] as String).compareTo(sevenDaysAgoStr) >= 0).toList();
 
-      final totalCal = filteredMeals.fold(0.0, (sum, r) => sum + (r['calories'] as double));
+      final totalCal = filteredMeals.fold(0.0, (sum, r) => sum + (r['calories'] as num).toDouble());
       final avgMood = filteredMood.isEmpty ? 0.0 : filteredMood.fold(0.0, (sum, r) => sum + (r['mood_score'] as int)) / filteredMood.length;
 
       return {
-        'avg_cal': totalCal / 7,
-        'total_water': filteredWater.fold(0, (sum, r) => sum + (r['glasses'] as int)),
+        'avg_kcal': totalCal / 7,
+        'total_water': 0,
         'avg_mood': avgMood,
+        'days_hit': 0,
+        'workout_count': filteredWorkouts.length,
       };
     }
+    
     final db = await database;
-    final calRes = await db!.rawQuery("SELECT SUM(calories) as total FROM meal_logs WHERE user_id = ? AND date(logged_at) >= date('now','-7 days')", [userId]);
-    final waterRes = await db.rawQuery("SELECT SUM(glasses) as total FROM water_logs WHERE user_id = ? AND date(logged_at) >= date('now','-7 days')", [userId]);
-    final moodRes = await db.rawQuery("SELECT AVG(mood_score) as avg_mood FROM mood_logs WHERE user_id = ? AND date(logged_at) >= date('now','-7 days')", [userId]);
+    if (db == null) return {'avg_kcal': 0, 'avg_mood': 0, 'days_hit': 0, 'workout_count': 0};
+    final calRes = await db.rawQuery("SELECT SUM(calories) as total FROM meal_logs WHERE user_id = ? AND date(logged_at) >= ?", [userId, sevenDaysAgoStr]);
+    final moodRes = await db.rawQuery("SELECT AVG(mood_score) as avg_mood FROM mood_logs WHERE user_id = ? AND date(logged_at) >= ?", [userId, sevenDaysAgoStr]);
+    final workoutRes = await db.rawQuery("SELECT COUNT(*) as cnt FROM workout_logs WHERE user_id = ? AND date(logged_at) >= ?", [userId, sevenDaysAgoStr]);
 
     return {
-      'avg_cal': ((calRes.first['total'] as num?) ?? 0) / 7,
-      'total_water': (waterRes.first['total'] as num?) ?? 0,
+      'avg_kcal': ((calRes.first['total'] as num?) ?? 0) / 7,
       'avg_mood': (moodRes.first['avg_mood'] as num?) ?? 0,
+      'days_hit': 0,
+      'workout_count': workoutRes.first['cnt'] ?? 0,
     };
   }
 }

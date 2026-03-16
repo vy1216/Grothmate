@@ -127,9 +127,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
   Widget _buildHeader(String aiName) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.border.withOpacity(0.5)),
+        ),
       ),
       child: Row(children: [
         Stack(children: [

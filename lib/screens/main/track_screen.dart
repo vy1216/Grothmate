@@ -209,7 +209,7 @@ class _MealsTab extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             GestureDetector(
-                              onTap: () => state.deleteMeal(item.id!),
+                              onTap: () => state.deleteMeal(item.id ?? 0),
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(

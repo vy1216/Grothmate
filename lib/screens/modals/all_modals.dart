@@ -84,6 +84,7 @@ class _LogWorkoutScreenState extends State<LogWorkoutScreen> {
               ),
             )).toList()),
           ),
+
           const SizedBox(height: 16),
           const AppLabel('Exercise'),
           const SizedBox(height: 8),
@@ -236,6 +237,7 @@ class _MoodLogScreenState extends State<MoodLogScreen> {
               ),
             ));
           }).toList()),
+
           const SizedBox(height: 20),
           const Text('Energy level', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 12),

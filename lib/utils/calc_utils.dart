@@ -88,12 +88,12 @@ class CalcUtils {
   }
 
   static Map<String, dynamic> getMoodConfig(int score) {
-    const configs = {
+    final configs = {
       5: {'label': 'Great', 'emoji': '😄', 'color': AppColors.accent, 'bg': AppColors.primary},
-      4: {'label': 'Good', 'emoji': '🙂', 'color': Color(0xFF1D9E75), 'bg': Color(0xFF163028)},
-      3: {'label': 'Okay', 'emoji': '😐', 'color': AppColors.amber, 'bg': Color(0xFF2A2010)},
-      2: {'label': 'Low', 'emoji': '😔', 'color': AppColors.coral, 'bg': Color(0xFF2A1A15)},
-      1: {'label': 'Anxious', 'emoji': '😰', 'color': AppColors.red, 'bg': Color(0xFF2A1515)},
+      4: {'label': 'Good', 'emoji': '🙂', 'color': const Color(0xFF1D9E75), 'bg': const Color(0xFF163028)},
+      3: {'label': 'Okay', 'emoji': '😐', 'color': AppColors.amber, 'bg': const Color(0xFF2A2010)},
+      2: {'label': 'Low', 'emoji': '😔', 'color': AppColors.coral, 'bg': const Color(0xFF2A1A15)},
+      1: {'label': 'Anxious', 'emoji': '😰', 'color': AppColors.red, 'bg': const Color(0xFF2A1515)},
     };
     return configs[score] ?? configs[3]!;
   }
