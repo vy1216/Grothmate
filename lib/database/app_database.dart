@@ -337,7 +337,11 @@ class AppDatabase {
         r['user_id'] == userId && 
         (r['logged_at'] as String).startsWith(today)
       ).toList();
-      return filtered.fold(0, (sum, r) => sum + (r['glasses'] as int));
+      int total = 0;
+      for (var r in filtered) {
+        total += (r['glasses'] as int);
+      }
+      return total;
     }
     final db = await database;
     if (db == null) return 0;
@@ -348,7 +352,38 @@ class AppDatabase {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  // ── WEIGHT ────────────────────────────────────────────
+  // ── VAULT ─────────────────────────────────────────────
+  Future<void> saveVaultEntry(VaultEntry entry) async {
+    if (kIsWeb) {
+      await WebStorage.insert('vault_entries', entry.toMap());
+      return;
+    }
+    final db = await database;
+    if (db == null) return;
+    await db.insert('vault_entries', entry.toMap());
+  }
+
+  Future<List<VaultEntry>> getVaultEntries(int userId) async {
+    if (kIsWeb) {
+      final rows = await WebStorage.load('vault_entries');
+      final filtered = rows.where((r) => r['user_id'] == userId).toList();
+      return filtered.map(VaultEntry.fromMap).toList();
+    }
+    final db = await database;
+    if (db == null) return [];
+    final rows = await db.query(
+      'vault_entries',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+    return rows.map(VaultEntry.fromMap).toList();
+  }
+
+  // ── CHAT ──────────────────────────────────────────────
+  Future<void> saveMessage(int userId, String role, String content, [String mode = 'health']) async {
+    await logChat(userId, role, content, mode);
+  }
   Future<void> logWeight(int userId, double kg) async {
     if (kIsWeb) {
       await WebStorage.insert('weight_entries', {
