@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'constants/theme.dart';
 import 'database/app_database.dart';
 import 'services/app_state.dart';
 import 'services/groq_service.dart';
