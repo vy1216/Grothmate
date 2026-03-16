@@ -1,1 +1,0 @@
-importScripts('https://cdn.jsdelivr.net/npm/sqflite-common-ffi-web@0.4.5+4/lib/src/sw/sqflite_sw.js');
