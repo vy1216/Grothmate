@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi_web/sqflite_swls.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:path/path.dart';
 import '../models/models.dart';
 import '../constants/food_database.dart';
@@ -18,7 +18,7 @@ class AppDatabase {
   Future<Database> _init() async {
     if (kIsWeb) {
       // Use indexedDB based storage for web persistence
-      var factory = createDatabaseFactoryFfiWeb();
+      var factory = databaseFactoryFfiWeb;
       _db = await factory.openDatabase('growthmate.db', options: OpenDatabaseOptions(
         version: 1,
         onCreate: _onCreate,

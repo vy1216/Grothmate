@@ -441,12 +441,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? FontStyle.italic
                                 : FontStyle.normal,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     items.isNotEmpty ? '${slotCal.round()}' : '—',
                     style: TextStyle(

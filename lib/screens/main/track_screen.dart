@@ -164,8 +164,14 @@ class _MealsTab extends StatelessWidget {
                       ),
                     )
                   else
-                    ...items.map((item) => Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                    ...items.map((item) => Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border2.withOpacity(0.5)),
+                      ),
                       child: Row(children: [
                         Expanded(
                           child: Column(
@@ -176,9 +182,10 @@ class _MealsTab extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 13,
                                   color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 'P: ${item.proteinG.round()}g  C: ${item.carbsG.round()}g  F: ${item.fatG.round()}g',
                                 style: const TextStyle(
@@ -189,22 +196,34 @@ class _MealsTab extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Text(
-                          '${item.calories.round()} kcal',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () => state.deleteMeal(item.id!),
-                          child: const Icon(
-                            Icons.close,
-                            size: 16,
-                            color: AppColors.coral,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${item.calories.round()} kcal',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            GestureDetector(
+                              onTap: () => state.deleteMeal(item.id!),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.coral.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 14,
+                                  color: AppColors.coral,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ]),
                     )),
